@@ -55,7 +55,7 @@ const findUser = async (email) => {
       {
         email
       },
-      'password loginAttempts blockExpires name email role verified verification',
+      'email password verification',
       (err, item) => {
         utils.itemNotFound(err, item, reject, 'USER_DOES_NOT_EXIST')
         resolve(item)
@@ -77,22 +77,6 @@ const findUserById = async (userId) => {
   })
 }
 
-/**
- * Adds one attempt to loginAttempts, then compares loginAttempts with the constant LOGIN_ATTEMPTS, if is less returns wrong password, else returns blockUser function
- * @param {Object} user - user object
- */
-const passwordsDoNotMatch = async (user) => {
-  user.loginAttempts += 1
-  await saveLoginAttemptsToDB(user)
-  return new Promise((resolve, reject) => {
-    if (user.loginAttempts <= LOGIN_ATTEMPTS) {
-      resolve(utils.buildErrObject(409, 'WRONG_PASSWORD'))
-    } else {
-      resolve(blockUser(user))
-    }
-    reject(utils.buildErrObject(422, 'ERROR'))
-  })
-}
 
 /**
  * Registers a new user in database
@@ -146,23 +130,6 @@ const checkPermissions = async (data, next) => {
 }
 
 /**
- * Gets user id from token
- * @param {string} token - Encrypted and encoded token
- */
-const getUserIdFromToken = async (token) => {
-  return new Promise((resolve, reject) => {
-    // Decrypts, verifies and decode token
-    jwt.verify(auth.decrypt(token), process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        reject(utils.buildErrObject(409, 'BAD_TOKEN'))
-      }
-      resolve(decoded.data._id)
-    })
-  })
-}
-
-
-/**
  * Saves a new user access and then returns token
  * @param {Object} req - request object
  * @param {Object} user - user object
@@ -179,7 +146,6 @@ const saveUserAccessAndReturnToken = async (req, user) => {
 }
 
 
-
 /**
  * Login function called by route
  * @param {Object} req - request object
@@ -191,7 +157,7 @@ exports.login = async (req, res) => {
     const user = await findUser(data.email)
     const isPasswordMatch = await auth.checkPassword(data.password, user)
     if (!isPasswordMatch) {
-      utils.handleError(res, await passwordsDoNotMatch(user))
+      utils.handleError(res, error)
     } else {
       res.status(200).json(await saveUserAccessAndReturnToken(req, user))
     }

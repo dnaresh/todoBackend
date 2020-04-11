@@ -5,8 +5,6 @@ const db = require('../middleware/db')
 const emailer = require('../middleware/emailer')
 const WebSocket = require('ws')
 const wss = new WebSocket.Server({port: 40510})
-const asyncRedis = require("async-redis");
-const client = asyncRedis.createClient();
 
 /**
  * Checks if a todo already exists excluding itself
@@ -176,16 +174,18 @@ exports.updateItem = async (req, res) => {
  */
 exports.createItem = async (req, res) => {
   try {
-	// Gets locale from header 'Accept-Language'
+	/*Gets locale from header 'Accept-Language'*/
     const locale = req.getLocale()
 	req = matchedData(req)
     const doestodoExists = await todoExists(req.name)
     if (!doestodoExists) {
 	  wss.on('connection',(ws) => {
 		ws.on('message',(message) => {
-			console.log('Web Socket Server connected Successfully..')
+			console.log('Web Socket Server Connected...')
+			console.log('Message received: %s', message)
+			console.log('Notification Sent')
 		  });
-		  ws.send('Message Received : Todo Task Created Successfully..!');
+		  ws.send('Todo Task Created Successfully..!')
 	  })
       emailer.sendTodoTaskCreationMessage(locale, req)
 	  res.status(201).json(await db.createItem(req, model))

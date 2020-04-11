@@ -23,12 +23,18 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Redis cache enabled by env variable
-/*if (process.env.USE_REDIS === 'true') {
-  const apicache = require('apicache')
-  const redis = require('redis')
-  const cacheWithRedis = apicache.options({ redisClient: redis.createClient() }).middleware
-  app.use(cacheWithRedis)
-}*/
+if (process.env.USE_REDIS === 'true') {
+  const getExpeditiousCache = require('express-expeditious')
+  const cache = getExpeditiousCache({
+    namespace: 'expresscache',
+    defaultTtl: '5 minute',
+    engine: require('expeditious-engine-redis')({
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT
+    })
+  })
+  app.use(cache)
+}
 
 // for parsing json
 app.use(
