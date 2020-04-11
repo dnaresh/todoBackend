@@ -21,6 +21,5 @@ const TodoSchema = new mongoose.Schema(
   }
 )
 
-
 TodoSchema.plugin(mongoosePaginate)
 module.exports = mongoose.model('Todo', TodoSchema)

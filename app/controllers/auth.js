@@ -6,21 +6,16 @@ const { matchedData } = require('express-validator')
 const auth = require('../middleware/auth')
 const emailer = require('../middleware/emailer')
 
-
-/*********************
- * Private functions *
- *********************/
-
 /**
  * Generates a token
  * @param {Object} user - user object
  */
 const generateToken = (user) => {
-  // Gets expiration time
+  /* Gets expiration time */
   const expiration =
     Math.floor(Date.now() / 1000) + 60 * process.env.JWT_EXPIRATION_IN_MINUTES
 
-  // returns signed and encrypted token
+ /*returns signed and encrypted token*/
   return auth.encrypt(
     jwt.sign(
       {
@@ -183,9 +178,7 @@ const saveUserAccessAndReturnToken = async (req, user) => {
   })
 }
 
-/********************
- * Public functions *
- ********************/
+
 
 /**
  * Login function called by route

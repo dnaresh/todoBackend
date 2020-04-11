@@ -9,6 +9,7 @@ const requireAuth = passport.authenticate('jwt', {
 })
 const trimRequest = require('trim-request')
 
+
 /*
  * Auth routes
  */
@@ -17,12 +18,19 @@ const trimRequest = require('trim-request')
  * Register route
  */
 router.post(
-  '/register', trimRequest.all, validate.register, controller.register)
+  '/register', 
+  trimRequest.all, 
+  validate.register, 
+  controller.register)
 
 
 /*
  * Login route
  */
-router.post('/login', trimRequest.all, validate.login, controller.login)
+router.post(
+'/login', 
+trimRequest.all, 
+validate.login, 
+controller.login)
 
 module.exports = router

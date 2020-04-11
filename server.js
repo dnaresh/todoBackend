@@ -10,7 +10,6 @@ const app = express()
 const i18n = require('i18n')
 const initMongo = require('./config/mongo')
 const path = require('path')
-
 const swaggerDocument = require('./swagger.json');
 const swaggerUi = require('swagger-ui-express');
 
@@ -24,18 +23,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Redis cache enabled by env variable
-if (process.env.USE_REDIS === 'true') {
-  const getExpeditiousCache = require('express-expeditious')
-  const cache = getExpeditiousCache({
-    namespace: 'expresscache',
-    defaultTtl: '1 minute',
-    engine: require('expeditious-engine-redis')({
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT
-    })
-  })
-  app.use(cache)
-}
+/*if (process.env.USE_REDIS === 'true') {
+  const apicache = require('apicache')
+  const redis = require('redis')
+  const cacheWithRedis = apicache.options({ redisClient: redis.createClient() }).middleware
+  app.use(cacheWithRedis)
+}*/
 
 // for parsing json
 app.use(

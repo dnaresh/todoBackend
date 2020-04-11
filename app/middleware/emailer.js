@@ -37,33 +37,31 @@ const sendEmail = async (data, callback) => {
  * @param {string} subject - subject
  * @param {string} htmlMessage - html message
  */
-const prepareToSendEmail = (user, subject, htmlMessage) => {
-  user = {
-    name: user.name,
-    email: user.email
+const prepareToSendEmail = (item, subject, htmlMessage) => {
+  item = {
+    name: item.name,
+    email: item.email
   }
   const data = {
-    user,
+    item,
     subject,
     htmlMessage
   }
-  
-  sendEmail(data, (messageSent) => messageSent ? console.log(`Email SENT to: ${user.email}`) : console.log(`Email FAILED to: ${user.email}`))
-  /*if (process.env.NODE_ENV === 'development') {
+
+  if (process.env.NODE_ENV === 'production') {
     sendEmail(data, (messageSent) =>
       messageSent
-        ? console.log(`Email SENT to: ${user.email}`)
-        : console.log(`Email FAILED to: ${user.email}`)
+        ? console.log(`Email SENT to: ${item.email}`)
+        : console.log(`Email FAILED to: ${item.email}`)
     )
-  } else if (process.env.NODE_ENV === 'production') {
+  } else if (process.env.NODE_ENV === 'development') {
     console.log(data)
-  }*/
+  }
 }
 
-
-
 module.exports = {
-  /**
+  
+   /**
    * Checks User model if user with an specific email exists
    * @param {string} email - user email
    */
@@ -102,7 +100,8 @@ module.exports = {
       )
     })
   },
-
+  
+  
   /**
    * Sends registration email
    * @param {string} locale - locale
@@ -116,5 +115,21 @@ module.exports = {
       user.name
     )
     prepareToSendEmail(user, subject, htmlMessage)
+  },
+  
+  
+  /**
+   * Sends Todo Task Creation email
+   * @param {string} locale - locale
+   * @param {Object} user - user object
+   */
+  async sendTodoTaskCreationMessage(locale, todo) {
+    i18n.setLocale(locale)
+    const subject = i18n.__('todoTask.SUBJECT')
+    const htmlMessage = i18n.__(
+      'todoTask.MESSAGE',
+      todo.name
+    )
+    prepareToSendEmail(todo, subject, htmlMessage)
   }
 }

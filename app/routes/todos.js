@@ -9,7 +9,6 @@ const requireAuth = passport.authenticate('jwt', {
   session: false
 })
 const trimRequest = require('trim-request')
-
 /*
  * todos routes
  */

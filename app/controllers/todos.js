@@ -3,10 +3,10 @@ const { matchedData } = require('express-validator')
 const utils = require('../middleware/utils')
 const db = require('../middleware/db')
 const emailer = require('../middleware/emailer')
-
-/*********************
- * Private functions *
- *********************/
+const WebSocket = require('ws')
+const wss = new WebSocket.Server({port: 40510})
+const asyncRedis = require("async-redis");
+const client = asyncRedis.createClient();
 
 /**
  * Checks if a todo already exists excluding itself
@@ -85,7 +85,6 @@ const verificationExists = async (id) => {
       },
       (err, todo) => {
         utils.itemNotFound(err, todo, reject, 'NOT_FOUND_OR_ALREADY_STATUS_CHANGED_COMPLETED')
-		console.log(todo)
         resolve(todo)
       }
     )
@@ -99,7 +98,6 @@ const verificationExists = async (id) => {
  */
 const changeStatus = async (todo) => {
   return new Promise((resolve, reject) => {
-    console.log(todo)
 	todo.isCompleted = true
     todo.save((err, item) => {
       if (err) {
@@ -110,9 +108,6 @@ const changeStatus = async (todo) => {
   })
 }
 
-/********************
- * Public functions *
- ********************/
 
 /**
  * Get all items function called by route
@@ -181,12 +176,18 @@ exports.updateItem = async (req, res) => {
  */
 exports.createItem = async (req, res) => {
   try {
-    // Gets locale from header 'Accept-Language'
+	// Gets locale from header 'Accept-Language'
     const locale = req.getLocale()
 	req = matchedData(req)
     const doestodoExists = await todoExists(req.name)
     if (!doestodoExists) {
-      emailer.sendRegistrationEmailMessage(locale, req)
+	  wss.on('connection',(ws) => {
+		ws.on('message',(message) => {
+			console.log('Web Socket Server connected Successfully..')
+		  });
+		  ws.send('Message Received : Todo Task Created Successfully..!');
+	  })
+      emailer.sendTodoTaskCreationMessage(locale, req)
 	  res.status(201).json(await db.createItem(req, model))
     }
   } catch (error) {
